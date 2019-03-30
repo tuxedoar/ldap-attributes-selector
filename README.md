@@ -4,7 +4,9 @@ This script allows you to query an LDAP server, based on a custom set of provide
 are not written to a CSV file unless explicitly specified. 
 
 ### Requirements
-This script should work with Python 2.X. Make sure you have the [python-ldap](https://pypi.python.org/pypi/python-ldap/) library (tested with *v2.4*), installed!.
+Make sure you meet the following requirements:
+ * [Python 3](https://www.python.org/downloads/)
+ * [python-ldap](https://pypi.python.org/pypi/python-ldap/) library (tested with *v3.1.0*).
 
 Also, note that when establishing an SSL connection, depending on the security settings in your LDAP server, you might gonna need to perform some additional
 configuration on your LDAP client!.   
@@ -44,7 +46,7 @@ Note that the following arguments are mandatory:
 
 The rest of them, are optional!.
 
-Note that whenever an entry doesn't have any of the provided LDAP attributes, a "NULL" string, will be printed!.
+Note that whenever an entry doesn't have any of the provided LDAP attributes, nothing will be printed!.
 
 ### Examples
 In the following example, an encrypted LDAP query (note the `ldaps://` when specifying the LDAP server) is made, and the attributes `name`, `mail` and `ipPhone` are retrieved. In addition, the search base used is `objectClass=person` and a maximum of 50 entries will be printed!:
