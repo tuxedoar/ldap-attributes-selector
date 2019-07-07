@@ -12,13 +12,16 @@ Also, note that when establishing an SSL connection, depending on the security s
 As a general rule, if you are able to make an LDAP query with the `ldapsearch` tool, this script should work as well!. 
 
 ### Installation
-Python package coming soon!.
+You can install it with `pip`:
+```
+pip install ldap-attributes-selector
+```
 
 ### Usage 
 Help output:
 ```
 usage: ldap-attributes-selector [-h] [-u USERDN] [-S SIZELIMIT] [-f FILTER]
-                                   [-w WRITETOCSV]
+                                   [-w WRITETOCSV] [-v]
                                    SERVER BASEDN USER_ATTRS
 
 Get a CSV formatted list from an LDAP database, given a custom set of provided
@@ -42,6 +45,7 @@ optional arguments:
                         Specify an LDAP filter (Default: 'objectClass=*')
   -w WRITETOCSV, --writetocsv WRITETOCSV
                         Write results to a CSV file!.
+  -v, --version         Show current version
 ```
 Note that whenever an entry doesn't have any of the provided LDAP attributes, nothing will be printed!.
 
