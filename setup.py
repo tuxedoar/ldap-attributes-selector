@@ -31,7 +31,6 @@ setup(
         "Operating System :: OS Independent",
         "Intended Audience :: System Administrators",
         "Environment :: Console",
-        "Topic :: System :: Systems Administration \
-        :: Authentication/Directory :: LDAP",
+        "Topic :: System :: Systems Administration :: Authentication/Directory :: LDAP",
         ],
 )
