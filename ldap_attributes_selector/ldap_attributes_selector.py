@@ -32,6 +32,7 @@ import sys
 import getpass
 from distutils.version import LooseVersion
 from ldap.controls import SimplePagedResultsControl
+from _version import __version__
 import ldap
 
 
@@ -77,6 +78,9 @@ def menu_handler():
                         help="Specify an LDAP filter (Default: 'objectClass=*')")
     parser.add_argument('-w', '--writetocsv', required=False, action='store',
                         help="Write results to a CSV file!.")
+    parser.add_argument('-v', '--version', action='version',
+                        version="%(prog)s {version}".format(version=__version__),
+                        help='Show current version')
 
     args = parser.parse_args()
     return args
