@@ -26,7 +26,6 @@
 
 # https://gist.github.com/mattfahrner/c228ead9c516fc322d3a#file-python-paged-ldap-snippet-2-4-py
 
-
 import csv
 import argparse
 import sys
@@ -143,14 +142,12 @@ def get_user_attrs(unordered_attrs):
 
     # If '-w' argument was given, call function to write results to CSV!.
     if menu.writetocsv:
-        writetoCSV(user_attrs)
+        writetoCSV(menu.writetocsv, user_attrs)
 
 
-def writetoCSV(attrs):
+def writetoCSV(csv_file, attrs):
     """ Write retrieved results to a CSV file """
-    menu = menu_handler()
-
-    with open(menu.writetocsv, 'a') as file:
+    with open(csv_file, 'a') as file:
         writer = csv.writer(file)
         writer.writerow(attrs)
 
