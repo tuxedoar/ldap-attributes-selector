@@ -49,8 +49,10 @@ class ldap_handler():
 
 
 def start_session(server, ldap_auth=None):
+    """ Initiate the LDAP session """
     menu = menu_handler()
     l = ldap.initialize(server)
+    l.protocol_version = 3
     if ldap_auth:
         user = menu.userdn
         creds = getpass.getpass('\nPlease, enter your LDAP credentials: ')
@@ -73,7 +75,7 @@ def menu_handler():
     parser.add_argument('-u', '--userdn', required=False, action='store',
                         help='Distinguished Name (DN) of the user to bind to the LDAP directory')
     parser.add_argument('-S', '--sizelimit', required=False, action='store',
-                        help='Specify the maximum number of LDAP entries to display (Default: 500)')
+                        help='The amount of per-page entries to retrieve (Default: 500)')
     parser.add_argument('-f', '--filter', required=False, action='store',
                         help="Specify an LDAP filter (Default: 'objectClass=*')")
     parser.add_argument('-w', '--writetocsv', required=False, action='store',
@@ -99,7 +101,6 @@ def create_controls(pagesize):
 
 def get_pctrls(serverctrls):
     """Lookup an LDAP paged control object from the returned controls."""
-
     # Look through the returned controls and find the page controls.
     # This will also have our returned cookie which we need to make
     # the next search request.
@@ -124,6 +125,7 @@ def set_cookie(lc_object, pctrls, pagesize):
     lc_object.controlValue = (pagesize, cookie)
     return cookie
 
+
 def get_user_attrs(unordered_attrs):
     """ Print attributes respecting what was selected by user """
     # attrs contains the LDAP entries and their selected attributes.
@@ -146,10 +148,10 @@ def get_user_attrs(unordered_attrs):
 
     # If '-w' argument was given, call function to write results to CSV!.
     if menu.writetocsv:
-        writetoCSV(menu.writetocsv, user_attrs)
+        write_to_csv(menu.writetocsv, user_attrs)
 
 
-def writetoCSV(csv_file, attrs):
+def write_to_csv(csv_file, attrs):
     """ Write retrieved results to a CSV file """
     with open(csv_file, 'a') as file:
         writer = csv.writer(file)
@@ -185,7 +187,6 @@ def ldap_paging(PAGE_SIZE, BASEDN, SEARCH_FILTER, ATTRS_LIST, LDAP_SESSION):
         # and attrs is a dictionary containing the attributes associated
         # with the entry. The keys of attrs are strings, and the associated
         # values are lists of strings.
-        # user_attrs = lconn.userAttrs.split(',')
         for dn, attrs in rdata:
             if isinstance(attrs, dict) and attrs:
                 get_user_attrs(attrs)
@@ -203,11 +204,11 @@ def ldap_paging(PAGE_SIZE, BASEDN, SEARCH_FILTER, ATTRS_LIST, LDAP_SESSION):
         if not cookie:
             break
 
-        # Clean up
-        lconn.unbind()
+    # Clean up
+    lconn.unbind()
 
-        # Done!
-        sys.exit(0)
+    # Done!
+    sys.exit(0)
 
 
 def main():
@@ -222,10 +223,12 @@ def main():
         # Check if sizelimit, filter opts were given.   
         PAGE_SIZE = int(menu.sizelimit) if menu.sizelimit else PAGE_SIZE
         SEARCH_FILTER = menu.filter if menu.filter else SEARCH_FILTER
-
+        # If an autheticated LDAP session was chosen, call the corresponding
+        # function with the proper argument: ldap_auth=True . 
         if menu.userdn:
             LDAP_SESSION = start_session(menu.SERVER, ldap_auth=True)
             ldap_paging(PAGE_SIZE, BASEDN, SEARCH_FILTER, ATTRS_LIST, LDAP_SESSION)
+        # No user was specified, so we don't pass the ldap_auth argument!.
         else:
             LDAP_SESSION = start_session(menu.SERVER)
             ldap_paging(PAGE_SIZE, BASEDN, SEARCH_FILTER, ATTRS_LIST, LDAP_SESSION)
