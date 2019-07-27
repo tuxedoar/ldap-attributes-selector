@@ -35,24 +35,17 @@ from ldap.controls import SimplePagedResultsControl
 from _version import __version__
 import ldap
 
-
-class ldap_handler():
-    """ Setup targeted LDAP server parameters """
-
-    # Check if we're using the Python "ldap" 2.4 or greater API
-    LDAP24API = LooseVersion(ldap.__version__) >= LooseVersion('2.4')
-
-    def __init__(self):
-        ldap.set_option(ldap.OPT_PROTOCOL_VERSION, ldap.VERSION3)
-        ldap.set_option(ldap.OPT_X_TLS_REQUIRE_CERT, ldap.OPT_X_TLS_NEVER)
-        ldap.set_option(ldap.OPT_REFERRALS, 0)
-
+# Check if we're using the Python "ldap" 2.4 or greater API
+LDAP24API = LooseVersion(ldap.__version__) >= LooseVersion('2.4')
 
 def start_session(server, ldap_auth=None):
     """ Initiate the LDAP session """
     menu = menu_handler()
+    ldap.set_option(ldap.OPT_X_TLS_REQUIRE_CERT, ldap.OPT_X_TLS_NEVER)
+    ldap.set_option(ldap.OPT_PROTOCOL_VERSION, ldap.VERSION3)
     l = ldap.initialize(server)
-    l.protocol_version = 3
+    l.set_option(ldap.OPT_REFERRALS, 0)
+
     if ldap_auth:
         user = menu.userdn
         creds = getpass.getpass('\nPlease, enter your LDAP credentials: ')
@@ -66,6 +59,7 @@ def start_session(server, ldap_auth=None):
 
 
 def menu_handler():
+    """ Setup available arguments """
     parser = argparse.ArgumentParser(
         description='Get a CSV formatted list from an LDAP database,'
                     ' given a custom set of provided attributes.')
@@ -81,7 +75,7 @@ def menu_handler():
     parser.add_argument('-w', '--writetocsv', required=False, action='store',
                         help="Write results to a CSV file!.")
     parser.add_argument('-v', '--version', action='version',
-                        version="%(prog)s {version}".format(version=__version__),
+                       version="%(prog)s {version}".format(version=__version__),
                         help='Show current version')
 
     args = parser.parse_args()
@@ -92,8 +86,7 @@ def create_controls(pagesize):
     """Create an LDAP control with a page size of "pagesize"."""
     # Initialize the LDAP controls for paging. Note that we pass ''
     # for the cookie because on first iteration, it starts out empty.
-    lconn = ldap_handler()
-    if lconn.LDAP24API:
+    if LDAP24API:
         return SimplePagedResultsControl(True, size=pagesize, cookie='')
     return SimplePagedResultsControl(ldap.LDAP_CONTROL_PAGE_OID, True,
                                      (pagesize, ''))
@@ -104,9 +97,7 @@ def get_pctrls(serverctrls):
     # Look through the returned controls and find the page controls.
     # This will also have our returned cookie which we need to make
     # the next search request.
-    lconn = ldap_handler()
-
-    if lconn.LDAP24API:
+    if LDAP24API:
         return [c for c in serverctrls
                 if c.controlType == SimplePagedResultsControl.controlType]
     return [c for c in serverctrls
@@ -115,9 +106,7 @@ def get_pctrls(serverctrls):
 
 def set_cookie(lc_object, pctrls, pagesize):
     """Push latest cookie back into the page control."""
-    lconn = ldap_handler()
-
-    if lconn.LDAP24API:
+    if LDAP24API:
         cookie = pctrls[0].cookie
         lc_object.cookie = cookie
         return cookie
@@ -126,33 +115,30 @@ def set_cookie(lc_object, pctrls, pagesize):
     return cookie
 
 
-def get_user_attrs(unordered_attrs):
-    """ Print attributes respecting what was selected by user """
-    # attrs contains the LDAP entries and their selected attributes.
-    attrs = unordered_attrs.items()
+def process_retrieved_data(retrieved_data):
+    """ Show retrieved data or export to CSV """
     menu = menu_handler()
     # Get the order in which attributes were requested!
     attrs_order = menu.USER_ATTRS.split(',')
 
-    # Go through the whole set of selected attributes and store
-    # them in the same order as the user requested them!.
-    for i in attrs:
-        key = i[0]
-        value = i[1]
-        # Generate a list with requested attributes in the right order!.
-        user_attrs = [unordered_attrs[e][0].decode() for e in attrs_order if \
-                      e in unordered_attrs]
-        break
-    # Print selected attributes!.
-    print(','.join(user_attrs))
+    # Go through the retrieved attributes and find those selected by the user.
+    # Replace with 'None' whenever an attribute is not found!. 
+    user_attrs = [retrieved_data.get(i,'None') for i in attrs_order]
+    # Decode bytes type objects only and leave out those that are not ('None')!. 
+    decoded_user_attrs = [i[0].decode() if isinstance(i[0], bytes) else i \
+                    for i in user_attrs]
 
     # If '-w' argument was given, call function to write results to CSV!.
     if menu.writetocsv:
-        write_to_csv(menu.writetocsv, user_attrs)
+        write_to_csv(menu.writetocsv, decoded_user_attrs)
+    else:
+        # Print selected attributes!.
+        print(','.join(decoded_user_attrs))
 
 
 def write_to_csv(csv_file, attrs):
     """ Write retrieved results to a CSV file """
+
     with open(csv_file, 'a') as file:
         writer = csv.writer(file)
         writer.writerow(attrs)
@@ -162,7 +148,6 @@ def ldap_paging(PAGE_SIZE, BASEDN, SEARCH_FILTER, ATTRS_LIST, LDAP_SESSION):
     """ Try to pull the search results using paged controls """
 
     lconn = LDAP_SESSION
-
     # Create the page control to work from
     lc = create_controls(PAGE_SIZE)
 
@@ -189,7 +174,7 @@ def ldap_paging(PAGE_SIZE, BASEDN, SEARCH_FILTER, ATTRS_LIST, LDAP_SESSION):
         # values are lists of strings.
         for dn, attrs in rdata:
             if isinstance(attrs, dict) and attrs:
-                get_user_attrs(attrs)
+                process_retrieved_data(attrs)
 
         # Get cookie for next request
         pctrls = get_pctrls(serverctrls)
@@ -212,7 +197,7 @@ def ldap_paging(PAGE_SIZE, BASEDN, SEARCH_FILTER, ATTRS_LIST, LDAP_SESSION):
 
 
 def main():
-    """ Try to execute LDAP functions """
+    """ Putting all together """
     try:
         menu = menu_handler()
         BASEDN = menu.BASEDN
@@ -223,13 +208,12 @@ def main():
         # Check if sizelimit, filter opts were given.   
         PAGE_SIZE = int(menu.sizelimit) if menu.sizelimit else PAGE_SIZE
         SEARCH_FILTER = menu.filter if menu.filter else SEARCH_FILTER
-        # If an autheticated LDAP session was chosen, call the corresponding
-        # function with the proper argument: ldap_auth=True . 
+        # Pass ldap_auth=True argument when LDAP authentication is needed!.
         if menu.userdn:
             LDAP_SESSION = start_session(menu.SERVER, ldap_auth=True)
             ldap_paging(PAGE_SIZE, BASEDN, SEARCH_FILTER, ATTRS_LIST, LDAP_SESSION)
-        # No user was specified, so we don't pass the ldap_auth argument!.
         else:
+            # Anonymous query is performed!.
             LDAP_SESSION = start_session(menu.SERVER)
             ldap_paging(PAGE_SIZE, BASEDN, SEARCH_FILTER, ATTRS_LIST, LDAP_SESSION)
 
