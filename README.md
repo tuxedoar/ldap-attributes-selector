@@ -48,7 +48,7 @@ optional arguments:
   -v, --version         Show current version
 ```
 Note that whenever an entry doesn't have any of the provided LDAP attributes, a
-'None' value will be printed!.
+`None` value will be printed!.
 
 ### Examples
 In the following example, an encrypted LDAP query (note the `ldaps://` when specifying the LDAP server) is made, and the attributes `name`, `mail` and `ipPhone` are retrieved. Also, LDAP filter `objectClass=person` is set:
