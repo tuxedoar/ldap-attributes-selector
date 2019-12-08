@@ -23,12 +23,11 @@ pip install ldap-attributes-selector
 ### Usage 
 Help output:
 ```
-usage: ldap-attributes-selector.py [-h] [-u USERDN] [-S SIZELIMIT] [-f FILTER]
-                                   [-w WRITETOCSV] [-v]
-                                   SERVER BASEDN ATTRIBUTES
+usage: ldap-attributes-selector [-h] [-u USERDN] [-S SIZELIMIT] [-f FILTER]
+                                [-w WRITETOCSV] [-v]
+                                SERVER BASEDN ATTRIBUTES
 
-Get a CSV formatted list from an LDAP database, given a custom set of provided
-attributes.
+Get a CSV formatted list, based on a custom set of LDAP attributes
 
 positional arguments:
   SERVER                URI formatted address (IP or domain name) of the LDAP
@@ -71,3 +70,4 @@ If no *user identity* (in DN format!) is specified (`-u` argument), an *anonymou
 ```
 ldap-attributes-selector ldap://somecorp.com "dc=somecorp,dc=com" "sn,givenName,mail"
 ```
+
