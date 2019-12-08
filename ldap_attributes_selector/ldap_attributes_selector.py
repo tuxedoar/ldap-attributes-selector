@@ -130,17 +130,26 @@ def process_retrieved_data(retrieved_data):
 
     # If '-w' argument was given, call function to write results to CSV!.
     if menu.writetocsv:
-        write_to_csv(menu.writetocsv, decoded_user_attrs)
+        write_to_csv(menu.writetocsv, 'a', decoded_user_attrs, \
+                        append_csv_headers=False)
     else:
         # Print selected attributes!.
         print(','.join(decoded_user_attrs))
 
 
-def write_to_csv(csv_file, attrs):
+def write_to_csv(csv_file, fmode, attrs, append_csv_headers=False):
     """ Write retrieved results to a CSV file """
 
-    with open(csv_file, 'a') as file:
-        writer = csv.writer(file)
+    with open(csv_file, fmode) as f:
+        writer = csv.writer(f)
+        # Append CSV headers when append_csv_headers=True
+        if append_csv_headers:
+            lines = f.readlines()
+            f.seek(0)
+            lines.insert(0, attrs)
+            f.writelines(lines)
+            sys.exit(0)
+
         writer.writerow(attrs)
 
 
@@ -182,11 +191,19 @@ def ldap_paging(PAGE_SIZE, BASEDN, SEARCH_FILTER, ATTRS_LIST, LDAP_SESSION):
             print("Warning: Server ignores RFC 2696 control.")
             break
 
+        #write_to_csv(csv_file, attrs, append_csv_columns=False)
+
         # Ok, we did find the page control, yank the cookie from it and
         # insert it into the control for our next search. If however there
         # is no cookie, we are done!
         cookie = set_cookie(lc, pctrls, PAGE_SIZE)
         if not cookie:
+            # Add CSV headers when no data is left!
+            menu = menu_handler()
+            if menu.writetocsv:
+                attrs = menu.USER_ATTRS+'\n'
+                write_to_csv(menu.writetocsv, 'r+', attrs, \
+                append_csv_headers=True)
             break
 
     # Clean up
