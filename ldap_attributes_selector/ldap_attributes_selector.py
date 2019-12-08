@@ -13,16 +13,10 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-# DESCRIPTION
-
-# This script allows you to query an LDAP server, based on a custom set of
-# provided attributes. The results are given in CSV format, though they
-# are not written to a CSV file unless explicitly specified.
-
 # ACKNOWLEDGMENT
 
 # The pieces of code that implement LDAP queries with paged controls in this
-# script, are based on this Python snippet:
+# program, are based on this Python snippet:
 
 # https://gist.github.com/mattfahrner/c228ead9c516fc322d3a#file-python-paged-ldap-snippet-2-4-py
 
@@ -38,24 +32,30 @@ import ldap
 # Check if we're using the Python "ldap" 2.4 or greater API
 LDAP24API = LooseVersion(ldap.__version__) >= LooseVersion('2.4')
 
-def start_session(server, ldap_auth=None):
-    """ Initiate the LDAP session """
-    menu = menu_handler()
-    ldap.set_option(ldap.OPT_X_TLS_REQUIRE_CERT, ldap.OPT_X_TLS_NEVER)
-    ldap.set_option(ldap.OPT_PROTOCOL_VERSION, ldap.VERSION3)
-    l = ldap.initialize(server)
-    l.set_option(ldap.OPT_REFERRALS, 0)
+def main():
+    """ Putting all together """
+    try:
+        menu = menu_handler()
+        BASEDN = menu.BASEDN
+        PAGE_SIZE = 500
+        SEARCH_FILTER = "objectClass=*"
+        ATTRS_LIST = menu.ATTRIBUTES.split(',')
 
-    if ldap_auth:
-        user = menu.userdn
-        creds = getpass.getpass('\nPlease, enter your LDAP credentials: ')
-        lsession = l.simple_bind_s(user, creds)
-        if lsession:
-            print("\nSuccessful LDAP authentication!\n")
-            return l
-    else:
-        print("\nWARNING: No user specified. Performing an anonymous query!\n")
-        return l
+        # Check if sizelimit, filter opts were given.   
+        PAGE_SIZE = int(menu.sizelimit) if menu.sizelimit else PAGE_SIZE
+        SEARCH_FILTER = menu.filter if menu.filter else SEARCH_FILTER
+        # Pass ldap_auth=True argument when LDAP authentication is needed!.
+        if menu.userdn:
+            LDAP_SESSION = start_session(menu.SERVER, ldap_auth=True)
+            ldap_paging(PAGE_SIZE, BASEDN, SEARCH_FILTER, ATTRS_LIST, LDAP_SESSION)
+        else:
+            # Anonymous query is performed!.
+            LDAP_SESSION = start_session(menu.SERVER)
+            ldap_paging(PAGE_SIZE, BASEDN, SEARCH_FILTER, ATTRS_LIST, LDAP_SESSION)
+
+    except (KeyboardInterrupt, ldap.SERVER_DOWN, ldap.UNWILLING_TO_PERFORM, \
+            ldap.INVALID_CREDENTIALS, ldap.SIZELIMIT_EXCEEDED) as e:
+        sys.exit(e)
 
 
 def menu_handler():
@@ -80,6 +80,26 @@ def menu_handler():
 
     args = parser.parse_args()
     return args
+
+
+def start_session(server, ldap_auth=None):
+    """ Initiate the LDAP session """
+    menu = menu_handler()
+    ldap.set_option(ldap.OPT_X_TLS_REQUIRE_CERT, ldap.OPT_X_TLS_NEVER)
+    ldap.set_option(ldap.OPT_PROTOCOL_VERSION, ldap.VERSION3)
+    l = ldap.initialize(server)
+    l.set_option(ldap.OPT_REFERRALS, 0)
+
+    if ldap_auth:
+        user = menu.userdn
+        creds = getpass.getpass('\nPlease, enter your LDAP credentials: ')
+        lsession = l.simple_bind_s(user, creds)
+        if lsession:
+            print("\nSuccessful LDAP authentication!\n")
+            return l
+    else:
+        print("\nWARNING: No user specified. Performing an anonymous query!\n")
+        return l
 
 
 def create_controls(pagesize):
@@ -191,8 +211,6 @@ def ldap_paging(PAGE_SIZE, BASEDN, SEARCH_FILTER, ATTRS_LIST, LDAP_SESSION):
             print("Warning: Server ignores RFC 2696 control.")
             break
 
-        #write_to_csv(csv_file, attrs, append_csv_columns=False)
-
         # Ok, we did find the page control, yank the cookie from it and
         # insert it into the control for our next search. If however there
         # is no cookie, we are done!
@@ -211,33 +229,6 @@ def ldap_paging(PAGE_SIZE, BASEDN, SEARCH_FILTER, ATTRS_LIST, LDAP_SESSION):
 
     # Done!
     sys.exit(0)
-
-
-def main():
-    """ Putting all together """
-    try:
-        menu = menu_handler()
-        BASEDN = menu.BASEDN
-        PAGE_SIZE = 500
-        SEARCH_FILTER = "objectClass=*"
-        ATTRS_LIST = menu.ATTRIBUTES.split(',')
-
-        # Check if sizelimit, filter opts were given.   
-        PAGE_SIZE = int(menu.sizelimit) if menu.sizelimit else PAGE_SIZE
-        SEARCH_FILTER = menu.filter if menu.filter else SEARCH_FILTER
-        # Pass ldap_auth=True argument when LDAP authentication is needed!.
-        if menu.userdn:
-            LDAP_SESSION = start_session(menu.SERVER, ldap_auth=True)
-            ldap_paging(PAGE_SIZE, BASEDN, SEARCH_FILTER, ATTRS_LIST, LDAP_SESSION)
-        else:
-            # Anonymous query is performed!.
-            LDAP_SESSION = start_session(menu.SERVER)
-            ldap_paging(PAGE_SIZE, BASEDN, SEARCH_FILTER, ATTRS_LIST, LDAP_SESSION)
-
-    except (KeyboardInterrupt, ldap.SERVER_DOWN, ldap.UNWILLING_TO_PERFORM, \
-            ldap.INVALID_CREDENTIALS, ldap.SIZELIMIT_EXCEEDED) as e:
-        sys.exit(e)
-
 
 if __name__ == "__main__":
     main()
