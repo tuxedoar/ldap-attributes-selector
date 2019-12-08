@@ -1,6 +1,9 @@
 # LDAP Attributes Selector 
 
-This command line program, allows you to query an LDAP server, based on a custom set of provided attributes. The results are given in CSV format, though they are not written to a CSV file unless explicitly specified. 
+This command line program, allows you to query an LDAP server and retrieve a custom set of provided attributes. The results are given in CSV format, though they are not written to a CSV file unless explicitly specified. 
+
+Whenever an LDAP entry doesn't have any of the provided attributes, a `None`
+value is set, instead!.
 
 ### Requirements
 Make sure you meet the following requirements:
@@ -20,9 +23,9 @@ pip install ldap-attributes-selector
 ### Usage 
 Help output:
 ```
-usage: ldap-attributes-selector [-h] [-u USERDN] [-S SIZELIMIT] [-f FILTER]
+usage: ldap-attributes-selector.py [-h] [-u USERDN] [-S SIZELIMIT] [-f FILTER]
                                    [-w WRITETOCSV] [-v]
-                                   SERVER BASEDN USER_ATTRS
+                                   SERVER BASEDN ATTRIBUTES
 
 Get a CSV formatted list from an LDAP database, given a custom set of provided
 attributes.
@@ -31,7 +34,7 @@ positional arguments:
   SERVER                URI formatted address (IP or domain name) of the LDAP
                         server
   BASEDN                Specify the searchbase or base DN of the LDAP server
-  USER_ATTRS            A set of comma separated LDAP attributes to list
+  ATTRIBUTES            A set of comma separated LDAP attributes to list
 
 optional arguments:
   -h, --help            show this help message and exit
@@ -47,8 +50,6 @@ optional arguments:
                         Write results to a CSV file!.
   -v, --version         Show current version
 ```
-Note that whenever an entry doesn't have any of the provided LDAP attributes, a
-`None` value will be printed!.
 
 ### Examples
 In the following example, an encrypted LDAP query (note the `ldaps://` when specifying the LDAP server) is made, and the attributes `name`, `mail` and `ipPhone` are retrieved. Also, LDAP filter `objectClass=person` is set:
