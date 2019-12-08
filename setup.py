@@ -5,7 +5,7 @@ with open("README.md", "r") as fh:
 
 setup(
     name='ldap-attributes-selector',
-    version='0.2.3',
+    version='0.2.4',
     description='Get a CSV formatted list from an LDAP database based on given attributes.',
     long_description=long_description,
     long_description_content_type="text/markdown",
