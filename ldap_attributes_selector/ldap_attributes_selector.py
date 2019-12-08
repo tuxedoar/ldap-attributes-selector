@@ -61,8 +61,8 @@ def main():
 def menu_handler():
     """ Setup available arguments """
     parser = argparse.ArgumentParser(
-        description='Get a CSV formatted list from an LDAP database,'
-                    ' given a custom set of provided attributes.')
+        description='Get a CSV formatted list, based on a custom set '
+                    'of LDAP attributes')
     parser.add_argument('SERVER', help='URI formatted address (IP or domain name) of the LDAP server')
     parser.add_argument('BASEDN', help='Specify the searchbase or base DN of the LDAP server')
     parser.add_argument('ATTRIBUTES', help='A set of comma separated LDAP attributes to list')
