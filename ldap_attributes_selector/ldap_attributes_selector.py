@@ -65,7 +65,7 @@ def menu_handler():
                     ' given a custom set of provided attributes.')
     parser.add_argument('SERVER', help='URI formatted address (IP or domain name) of the LDAP server')
     parser.add_argument('BASEDN', help='Specify the searchbase or base DN of the LDAP server')
-    parser.add_argument('USER_ATTRS', help='A set of comma separated LDAP attributes to list')
+    parser.add_argument('ATTRIBUTES', help='A set of comma separated LDAP attributes to list')
     parser.add_argument('-u', '--userdn', required=False, action='store',
                         help='Distinguished Name (DN) of the user to bind to the LDAP directory')
     parser.add_argument('-S', '--sizelimit', required=False, action='store',
@@ -119,7 +119,7 @@ def process_retrieved_data(retrieved_data):
     """ Show retrieved data or export to CSV """
     menu = menu_handler()
     # Get the order in which attributes were requested!
-    attrs_order = menu.USER_ATTRS.split(',')
+    attrs_order = menu.ATTRIBUTES.split(',')
 
     # Go through the retrieved attributes and find those selected by the user.
     # Replace with 'None' whenever an attribute is not found!. 
@@ -198,10 +198,10 @@ def ldap_paging(PAGE_SIZE, BASEDN, SEARCH_FILTER, ATTRS_LIST, LDAP_SESSION):
         # is no cookie, we are done!
         cookie = set_cookie(lc, pctrls, PAGE_SIZE)
         if not cookie:
-            # Add CSV headers when no data is left!
+            # Add CSV headers when it's appropiate!
             menu = menu_handler()
             if menu.writetocsv:
-                attrs = menu.USER_ATTRS+'\n'
+                attrs = menu.ATTRIBUTES+'\n'
                 write_to_csv(menu.writetocsv, 'r+', attrs, \
                 append_csv_headers=True)
             break
@@ -220,7 +220,7 @@ def main():
         BASEDN = menu.BASEDN
         PAGE_SIZE = 500
         SEARCH_FILTER = "objectClass=*"
-        ATTRS_LIST = menu.USER_ATTRS.split(',')
+        ATTRS_LIST = menu.ATTRIBUTES.split(',')
 
         # Check if sizelimit, filter opts were given.   
         PAGE_SIZE = int(menu.sizelimit) if menu.sizelimit else PAGE_SIZE
