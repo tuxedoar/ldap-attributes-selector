@@ -1,2 +1,2 @@
 """ Show version of this program """
-__version__ = 'v0.2.4'
+__version__ = 'v0.2.5'
