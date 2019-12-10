@@ -160,17 +160,13 @@ def process_retrieved_data(retrieved_data):
 def write_to_csv(csv_file, fmode, attrs, append_csv_headers=False):
     """ Write retrieved results to a CSV file """
 
-    with open(csv_file, fmode) as f:
-        writer = csv.writer(f)
-        # Append CSV headers when append_csv_headers=True
-        if append_csv_headers:
-            lines = f.readlines()
-            f.seek(0)
-            lines.insert(0, attrs)
-            f.writelines(lines)
-            sys.exit(0)
-
-        writer.writerow(attrs)
+    if append_csv_headers:
+        with open(csv_file, 'r') as original: data = original.read()
+        with open(csv_file, 'w') as modified: modified.write(attrs + data)
+    else:
+        with open(csv_file, fmode) as f:
+            writer = csv.writer(f)
+            writer.writerow(attrs)
 
 
 def ldap_paging(PAGE_SIZE, BASEDN, SEARCH_FILTER, ATTRS_LIST, LDAP_SESSION):
@@ -216,13 +212,14 @@ def ldap_paging(PAGE_SIZE, BASEDN, SEARCH_FILTER, ATTRS_LIST, LDAP_SESSION):
         # is no cookie, we are done!
         cookie = set_cookie(lc, pctrls, PAGE_SIZE)
         if not cookie:
-            # Add CSV headers when it's appropiate!
-            menu = menu_handler()
-            if menu.writetocsv:
-                attrs = menu.ATTRIBUTES+'\n'
-                write_to_csv(menu.writetocsv, 'r+', attrs, \
-                append_csv_headers=True)
             break
+
+    # Add CSV headers
+    menu = menu_handler()
+    if menu.writetocsv:
+        attrs = menu.ATTRIBUTES+'\n'
+        write_to_csv(menu.writetocsv, 'r+', attrs, \
+        append_csv_headers=True)
 
     # Clean up
     lconn.unbind()
