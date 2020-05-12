@@ -1,18 +1,19 @@
 # LDAP Attributes Selector 
 
-This command line program, allows you to query an LDAP server and retrieve a custom set of provided attributes. The results are given in CSV format, though they are not written to a CSV file unless explicitly specified. 
+This command line program, allows you to query an LDAP server and retrieve a custom set of provided attributes. 
 
-Whenever an LDAP entry doesn't have any of the provided attributes, a `None`
-value is set, instead!.
+### Features
+This program offers the following features:
+ * Support for both *anonymous* and *authenticated LDAP queries*.
+ * Encrypted queries with SSL.
+ * Support for *LDAP filters* and *LDAP paging* (retrieve the total amount of
+entries, regardless of limitations imposed by the server)!.
+ * Export results to CSV.
 
 ### Requirements
 Make sure you meet the following requirements:
  * [Python 3](https://www.python.org/downloads/)
  * [python-ldap](https://pypi.python.org/pypi/python-ldap/) library (tested with *v3.1.0*).
-
-Also, note that when establishing an SSL connection, depending on the security settings in your LDAP server, you might gonna need to perform some additional configuration on your LDAP client!.   
-
-As a general rule, if you are able to make an LDAP query with the `ldapsearch` tool, this program should work as well!. 
 
 ### Installation
 You can install it with `pip`:
@@ -21,7 +22,16 @@ pip install ldap-attributes-selector
 ```
 
 ### Usage 
-Help output:
+Results are shown in CSV format, but they aren't written to a file by default!.
+
+Note that whenever an LDAP entry doesn't have any of the provided attributes, a `None` value is set, instead!.
+
+Also, take into account that when establishing an SSL connection, depending on the security settings in your
+LDAP server, you might gonna need to perform some additional configuration on your LDAP client!.   
+
+As a general rule, if you are able to make an LDAP query with the `ldapsearch` tool, this program should work as well!. 
+
+Here's the complete help output:
 ```
 usage: ldap-attributes-selector [-h] [-u USERDN] [-S SIZELIMIT] [-f FILTER]
                                 [-w WRITETOCSV] [-v]
@@ -71,3 +81,5 @@ If no *user identity* (in DN format!) is specified (`-u` argument), an *anonymou
 ldap-attributes-selector ldap://somecorp.com "dc=somecorp,dc=com" "sn,givenName,mail"
 ```
 
+### License
+This program is licensed under the GPLv3.
