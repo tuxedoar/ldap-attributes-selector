@@ -1,4 +1,4 @@
-# Copyright 2019 by tuxedoar@gmail.com .
+# Copyright 2020 by tuxedoar@gmail.com .
 
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -37,13 +37,10 @@ def main():
     try:
         menu = menu_handler()
         BASEDN = menu.BASEDN
-        PAGE_SIZE = 500
-        SEARCH_FILTER = "objectClass=*"
+        PAGE_SIZE = menu.sizelimit
+        SEARCH_FILTER = menu.filter
         ATTRS_LIST = menu.ATTRIBUTES.split(',')
 
-        # Check if sizelimit, filter opts were given.   
-        PAGE_SIZE = int(menu.sizelimit) if menu.sizelimit else PAGE_SIZE
-        SEARCH_FILTER = menu.filter if menu.filter else SEARCH_FILTER
         # Pass ldap_auth=True argument when LDAP authentication is needed!.
         if menu.userdn:
             LDAP_SESSION = start_session(menu.SERVER, ldap_auth=True)
@@ -68,9 +65,10 @@ def menu_handler():
     parser.add_argument('ATTRIBUTES', help='A set of comma separated LDAP attributes to list')
     parser.add_argument('-u', '--userdn', required=False, action='store',
                         help='Distinguished Name (DN) of the user to bind to the LDAP directory')
-    parser.add_argument('-S', '--sizelimit', required=False, action='store',
+    parser.add_argument('-S', '--sizelimit', nargs='?', type=int, default=500,
                         help='The amount of per-page entries to retrieve (Default: 500)')
-    parser.add_argument('-f', '--filter', required=False, action='store',
+    parser.add_argument('-f', '--filter', nargs='?', type=str,
+                        default="objectClass=*", \
                         help="Specify an LDAP filter (Default: 'objectClass=*')")
     parser.add_argument('-w', '--writetocsv', required=False, action='store',
                         help="Write results to a CSV file!.")
