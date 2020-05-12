@@ -22,7 +22,7 @@
 
 import csv
 import argparse
-import sys
+from sys import exit
 import getpass
 from distutils.version import LooseVersion
 from ldap.controls import SimplePagedResultsControl
@@ -55,7 +55,7 @@ def main():
 
     except (KeyboardInterrupt, ldap.SERVER_DOWN, ldap.UNWILLING_TO_PERFORM, \
             ldap.INVALID_CREDENTIALS, ldap.SIZELIMIT_EXCEEDED) as e:
-        sys.exit(e)
+        exit(e)
 
 
 def menu_handler():
@@ -184,13 +184,13 @@ def ldap_paging(PAGE_SIZE, BASEDN, SEARCH_FILTER, ATTRS_LIST, LDAP_SESSION):
             msgid = lconn.search_ext(BASEDN, ldap.SCOPE_SUBTREE, SEARCH_FILTER,
                                        ATTRS_LIST, serverctrls=[lc])
         except ldap.LDAPError as e:
-            sys.exit('LDAP search failed: %s' % e)
+            exit('LDAP search failed: %s' % e)
 
         # Pull the results from the search request
         try:
             rtype, rdata, rmsgid, serverctrls = lconn.result3(msgid)
         except ldap.LDAPError as e:
-            sys.exit('Could not pull LDAP results: %s' % e)
+            exit('Could not pull LDAP results: %s' % e)
 
         # Each "rdata" is a tuple of the form (dn, attrs), where dn is
         # a string containing the DN (distinguished name) of the entry,
@@ -225,7 +225,7 @@ def ldap_paging(PAGE_SIZE, BASEDN, SEARCH_FILTER, ATTRS_LIST, LDAP_SESSION):
     lconn.unbind()
 
     # Done!
-    sys.exit(0)
+    exit(0)
 
 if __name__ == "__main__":
     main()
