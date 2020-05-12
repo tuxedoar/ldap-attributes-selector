@@ -5,7 +5,7 @@ with open("README.md", "r") as fh:
 
 setup(
     name='ldap-attributes-selector',
-    version='0.2.5',
+    version='0.2.6',
     description='Get a CSV formatted list, based on a custom set of LDAP attributes.',
     long_description=long_description,
     long_description_content_type="text/markdown",
@@ -13,7 +13,7 @@ setup(
     author='tuxedoar',
     author_email='tuxedoar@gmail.com',
     packages=['ldap_attributes_selector'],
-    python_requires='>=3.4',
+    python_requires='>=3.6',
     scripts=["ldap_attributes_selector/_version.py"],
     entry_points={
         "console_scripts": [
@@ -26,7 +26,7 @@ setup(
 
     classifiers=[
         "Programming Language :: Python :: 3 :: Only",
-        "Programming Language :: Python :: 3.4",
+        "Programming Language :: Python :: 3.6",
         "License :: OSI Approved :: GNU General Public License v3 (GPLv3)",
         "Operating System :: OS Independent",
         "Intended Audience :: System Administrators",
