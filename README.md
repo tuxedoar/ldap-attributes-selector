@@ -13,7 +13,8 @@ entries, regardless of limitations imposed by the server)!.
 ### Requirements
 Make sure you meet the following requirements:
  * [Python 3](https://www.python.org/downloads/)
- * [python-ldap](https://pypi.python.org/pypi/python-ldap/) library (tested with *v3.1.0*).
+ * [python-ldap](https://pypi.python.org/pypi/python-ldap/) library (tested
+with *v3.2.0*).
 
 ### Installation
 You can install it with `pip`:
