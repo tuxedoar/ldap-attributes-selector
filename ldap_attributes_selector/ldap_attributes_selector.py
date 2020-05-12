@@ -30,8 +30,6 @@ from ldap.controls import SimplePagedResultsControl
 from _version import __version__
 import ldap
 
-# Check if we're using the Python "ldap" 2.4 or greater API
-LDAP24API = LooseVersion(ldap.__version__) >= LooseVersion('2.4')
 
 def main():
     """ LDAP session and logging setup """
@@ -104,31 +102,31 @@ def start_session(server, ldap_auth=None):
         return l
 
 
-def create_controls(pagesize):
+def create_controls(pagesize, LDAP_API_CHECK):
     """Create an LDAP control with a page size of "pagesize"."""
     # Initialize the LDAP controls for paging. Note that we pass ''
     # for the cookie because on first iteration, it starts out empty.
-    if LDAP24API:
+    if LDAP_API_CHECK:
         return SimplePagedResultsControl(True, size=pagesize, cookie='')
     return SimplePagedResultsControl(ldap.LDAP_CONTROL_PAGE_OID, True,
                                      (pagesize, ''))
 
 
-def get_pctrls(serverctrls):
+def get_pctrls(serverctrls, LDAP_API_CHECK):
     """Lookup an LDAP paged control object from the returned controls."""
     # Look through the returned controls and find the page controls.
     # This will also have our returned cookie which we need to make
     # the next search request.
-    if LDAP24API:
+    if LDAP_API_CHECK:
         return [c for c in serverctrls
                 if c.controlType == SimplePagedResultsControl.controlType]
     return [c for c in serverctrls
             if c.controlType == ldap.LDAP_CONTROL_PAGE_OID]
 
 
-def set_cookie(lc_object, pctrls, pagesize):
+def set_cookie(lc_object, pctrls, pagesize, LDAP_API_CHECK):
     """Push latest cookie back into the page control."""
-    if LDAP24API:
+    if LDAP_API_CHECK:
         cookie = pctrls[0].cookie
         lc_object.cookie = cookie
         return cookie
@@ -173,10 +171,11 @@ def write_to_csv(csv_file, fmode, attrs, append_csv_headers=False):
 
 def ldap_paging(PAGE_SIZE, BASEDN, SEARCH_FILTER, ATTRS_LIST, LDAP_SESSION):
     """ Try to pull the search results using paged controls """
-
+    # Check if we're using the Python "ldap" 2.4 or greater API
+    LDAP_API_CHECK = LooseVersion(ldap.__version__) >= LooseVersion('2.4')
     lconn = LDAP_SESSION
     # Create the page control to work from
-    lc = create_controls(PAGE_SIZE)
+    lc = create_controls(PAGE_SIZE, LDAP_API_CHECK)
 
     # Do searches until we run out of "pages" to get from
     # the LDAP server.
@@ -204,7 +203,7 @@ def ldap_paging(PAGE_SIZE, BASEDN, SEARCH_FILTER, ATTRS_LIST, LDAP_SESSION):
                 process_retrieved_data(attrs)
 
         # Get cookie for next request
-        pctrls = get_pctrls(serverctrls)
+        pctrls = get_pctrls(serverctrls, LDAP_API_CHECK)
         if not pctrls:
             logging.warn("Warning: Server ignores RFC 2696 control.")
             break
@@ -212,7 +211,7 @@ def ldap_paging(PAGE_SIZE, BASEDN, SEARCH_FILTER, ATTRS_LIST, LDAP_SESSION):
         # Ok, we did find the page control, yank the cookie from it and
         # insert it into the control for our next search. If however there
         # is no cookie, we are done!
-        cookie = set_cookie(lc, pctrls, PAGE_SIZE)
+        cookie = set_cookie(lc, pctrls, PAGE_SIZE, LDAP_API_CHECK)
         if not cookie:
             break
 
