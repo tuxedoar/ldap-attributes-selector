@@ -24,8 +24,8 @@ pip install ldap-attributes-selector
 ### Usage 
 First, some aspects of this tool to take into account:
  * Results are shown in CSV format, but they aren't written to a file by default!.
- * Note that whenever an *LDAP entry* doesn't have any of the provided
- * *attributes*, a `None` value is set, instead!.
+ * Note that whenever an *LDAP entry* doesn't have any of the provided *attributes*,
+a `None` value is set, instead!.
  * Take into account that when establishing an SSL connection, depending on the security settings in your
 LDAP server, you might gonna need to perform some additional configuration on your LDAP client!.   
  * As a general rule, if you are able to make an LDAP query with the `ldapsearch` tool, this program should work as well!. 
