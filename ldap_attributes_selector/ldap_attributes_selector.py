@@ -23,6 +23,7 @@
 import csv
 import argparse
 from sys import exit
+import logging
 import getpass
 from distutils.version import LooseVersion
 from ldap.controls import SimplePagedResultsControl
@@ -33,8 +34,11 @@ import ldap
 LDAP24API = LooseVersion(ldap.__version__) >= LooseVersion('2.4')
 
 def main():
-    """ Putting all together """
+    """ LDAP session and logging setup """
     try:
+        # Setup logging
+        logging.basicConfig(format='%(message)s', level=logging.INFO)
+        # Setup arguments for LDAP session
         menu = menu_handler()
         BASEDN = menu.BASEDN
         PAGE_SIZE = menu.sizelimit
@@ -93,10 +97,10 @@ def start_session(server, ldap_auth=None):
         creds = getpass.getpass('\nPlease, enter your LDAP credentials: ')
         lsession = l.simple_bind_s(user, creds)
         if lsession:
-            print("\nSuccessful LDAP authentication!\n")
+            logging.info("\nSuccessful LDAP authentication!\n")
             return l
     else:
-        print("\nWARNING: No user specified. Performing an anonymous query!\n")
+        logging.warn("\nWARNING: No user specified. Performing an anonymous query!\n")
         return l
 
 
@@ -202,7 +206,7 @@ def ldap_paging(PAGE_SIZE, BASEDN, SEARCH_FILTER, ATTRS_LIST, LDAP_SESSION):
         # Get cookie for next request
         pctrls = get_pctrls(serverctrls)
         if not pctrls:
-            print("Warning: Server ignores RFC 2696 control.")
+            logging.warn("Warning: Server ignores RFC 2696 control.")
             break
 
         # Ok, we did find the page control, yank the cookie from it and
