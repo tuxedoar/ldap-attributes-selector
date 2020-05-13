@@ -223,10 +223,8 @@ def ldap_paging(PAGE_SIZE, BASEDN, SEARCH_FILTER, ATTRS_LIST, LDAP_SESSION):
         write_to_csv(menu.writetocsv, 'r+', attrs, \
         append_csv_headers=True)
 
-    # Clean up
+    # Clean up and exit
     lconn.unbind()
-
-    # Done!
     exit(0)
 
 if __name__ == "__main__":
