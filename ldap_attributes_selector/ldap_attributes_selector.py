@@ -49,7 +49,7 @@ def main():
             ldap_paging(PAGE_SIZE, BASEDN, SEARCH_FILTER, ATTRS_LIST, LDAP_SESSION)
         else:
             # Anonymous query is performed!.
-            LDAP_SESSION = start_session(menu.SERVER)
+            LDAP_SESSION = start_session(menu.SERVER, ldap_auth=False)
             ldap_paging(PAGE_SIZE, BASEDN, SEARCH_FILTER, ATTRS_LIST, LDAP_SESSION)
 
     except (KeyboardInterrupt, ldap.SERVER_DOWN, ldap.UNWILLING_TO_PERFORM, \
@@ -81,8 +81,8 @@ def menu_handler():
     args = parser.parse_args()
     return args
 
-
-def start_session(server, ldap_auth=None):
+# ldap_auth=None
+def start_session(server, ldap_auth):
     """ Initiate the LDAP session """
     menu = menu_handler()
     ldap.set_option(ldap.OPT_X_TLS_REQUIRE_CERT, ldap.OPT_X_TLS_NEVER)
@@ -96,10 +96,9 @@ def start_session(server, ldap_auth=None):
         lsession = l.simple_bind_s(user, creds)
         if lsession:
             logging.info("\nSuccessful LDAP authentication!\n")
-            return l
     else:
         logging.warning("\nWARNING: No user specified. Performing an anonymous query!\n")
-        return l
+    return l
 
 
 def create_controls(pagesize, LDAP_API_CHECK):
@@ -161,8 +160,10 @@ def write_to_csv(csv_file, fmode, attrs, append_csv_headers=False):
     """ Write retrieved results to a CSV file """
 
     if append_csv_headers:
-        with open(csv_file, 'r') as original: data = original.read()
-        with open(csv_file, 'w') as modified: modified.write(attrs + data)
+        with open(csv_file, 'r') as original:
+            data = original.read()
+        with open(csv_file, 'w') as modified:
+            modified.write(attrs + data)
     else:
         with open(csv_file, fmode) as f:
             writer = csv.writer(f)
