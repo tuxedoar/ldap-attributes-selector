@@ -27,8 +27,8 @@ import logging
 import getpass
 from distutils.version import LooseVersion
 from ldap.controls import SimplePagedResultsControl
-from _version import __version__
 import ldap
+from _version import __version__
 
 
 def main():
@@ -75,13 +75,13 @@ def menu_handler():
     parser.add_argument('-w', '--writetocsv', required=False, action='store',
                         help="Write results to a CSV file!.")
     parser.add_argument('-v', '--version', action='version',
-                       version="%(prog)s {version}".format(version=__version__),
+                        version="%(prog)s {version}".format(version=__version__),
                         help='Show current version')
 
     args = parser.parse_args()
     return args
 
-# ldap_auth=None
+
 def start_session(server, ldap_auth):
     """ Initiate the LDAP session """
     menu = menu_handler()
@@ -141,9 +141,9 @@ def process_retrieved_data(retrieved_data):
     attrs_order = menu.ATTRIBUTES.split(',')
 
     # Go through the retrieved attributes and find those selected by the user.
-    # Replace with 'None' whenever an attribute is not found!. 
-    user_attrs = [retrieved_data.get(i,'None') for i in attrs_order]
-    # Decode bytes type objects only and leave out those that are not ('None')!. 
+    # Replace with 'None' whenever an attribute is not found!.
+    user_attrs = [retrieved_data.get(i, 'None') for i in attrs_order]
+    # Decode bytes type objects only and leave out those that are not ('None')!.
     decoded_user_attrs = [i[0].decode() if isinstance(i[0], bytes) else i \
                     for i in user_attrs]
 
@@ -184,7 +184,7 @@ def ldap_paging(PAGE_SIZE, BASEDN, SEARCH_FILTER, ATTRS_LIST, LDAP_SESSION):
         # Send search request
         try:
             msgid = lconn.search_ext(BASEDN, ldap.SCOPE_SUBTREE, SEARCH_FILTER,
-                                       ATTRS_LIST, serverctrls=[lc])
+                                     ATTRS_LIST, serverctrls=[lc])
         except ldap.LDAPError as e:
             exit('LDAP search failed: %s' % e)
 
