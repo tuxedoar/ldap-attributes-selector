@@ -98,7 +98,7 @@ def start_session(server, ldap_auth=None):
             logging.info("\nSuccessful LDAP authentication!\n")
             return l
     else:
-        logging.warn("\nWARNING: No user specified. Performing an anonymous query!\n")
+        logging.warning("\nWARNING: No user specified. Performing an anonymous query!\n")
         return l
 
 
@@ -205,7 +205,7 @@ def ldap_paging(PAGE_SIZE, BASEDN, SEARCH_FILTER, ATTRS_LIST, LDAP_SESSION):
         # Get cookie for next request
         pctrls = get_pctrls(serverctrls, LDAP_API_CHECK)
         if not pctrls:
-            logging.warn("Warning: Server ignores RFC 2696 control.")
+            logging.warning("Warning: Server ignores RFC 2696 control.")
             break
 
         # Ok, we did find the page control, yank the cookie from it and
