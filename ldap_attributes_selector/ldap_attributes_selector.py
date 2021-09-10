@@ -29,7 +29,9 @@ from distutils.version import LooseVersion
 from ldap.controls import SimplePagedResultsControl
 import ldap
 from _version import __version__
-
+from ldap_attributes_selector.ldap_paging import create_controls
+from ldap_attributes_selector.ldap_paging import get_pctrls
+from ldap_attributes_selector.ldap_paging import set_cookie
 
 def main():
     """ LDAP session and logging setup """
@@ -99,39 +101,6 @@ def start_session(server, ldap_auth):
     else:
         logging.warning("\nWARNING: No user specified. Performing an anonymous query!\n")
     return l
-
-
-def create_controls(pagesize, LDAP_API_CHECK):
-    """Create an LDAP control with a page size of "pagesize"."""
-    # Initialize the LDAP controls for paging. Note that we pass ''
-    # for the cookie because on first iteration, it starts out empty.
-    if LDAP_API_CHECK:
-        return SimplePagedResultsControl(True, size=pagesize, cookie='')
-    return SimplePagedResultsControl(ldap.LDAP_CONTROL_PAGE_OID, True,
-                                     (pagesize, ''))
-
-
-def get_pctrls(serverctrls, LDAP_API_CHECK):
-    """Lookup an LDAP paged control object from the returned controls."""
-    # Look through the returned controls and find the page controls.
-    # This will also have our returned cookie which we need to make
-    # the next search request.
-    if LDAP_API_CHECK:
-        return [c for c in serverctrls
-                if c.controlType == SimplePagedResultsControl.controlType]
-    return [c for c in serverctrls
-            if c.controlType == ldap.LDAP_CONTROL_PAGE_OID]
-
-
-def set_cookie(lc_object, pctrls, pagesize, LDAP_API_CHECK):
-    """Push latest cookie back into the page control."""
-    if LDAP_API_CHECK:
-        cookie = pctrls[0].cookie
-        lc_object.cookie = cookie
-        return cookie
-    est, cookie = pctrls[0].controlValue
-    lc_object.controlValue = (pagesize, cookie)
-    return cookie
 
 
 def process_retrieved_data(retrieved_data):
