@@ -28,6 +28,7 @@ import getpass
 from distutils.version import LooseVersion
 from ldap.controls import SimplePagedResultsControl
 import ldap
+import ldapurl
 from _version import __version__
 from ldap_attributes_selector.ldap_paging import create_controls
 from ldap_attributes_selector.ldap_paging import get_pctrls
@@ -44,6 +45,11 @@ def main():
         PAGE_SIZE = menu.sizelimit
         SEARCH_FILTER = menu.filter
         ATTRS_LIST = menu.ATTRIBUTES.split(',')
+
+        # Validate LDAP server URL
+        if not ldapurl.isLDAPUrl(menu.SERVER):
+            logging.critical("\nERROR: %s has an invalid URL format!\n", menu.SERVER)
+            exit(1)
 
         # Pass ldap_auth=True argument when LDAP authentication is needed!.
         if menu.userdn:
