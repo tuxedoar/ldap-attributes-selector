@@ -25,13 +25,11 @@ import argparse
 from sys import exit
 import logging
 import getpass
-from distutils.version import LooseVersion
-import ldap
 import ldapurl
+from distutils.version import LooseVersion
 from _version import __version__
-from ldap_attributes_selector.ldap_paging import create_controls
-from ldap_attributes_selector.ldap_paging import get_pctrls
-from ldap_attributes_selector.ldap_paging import set_cookie
+from ldap_attributes_selector.ldap_paging import ldap_paging
+
 
 def main():
     """ LDAP session and logging setup """
@@ -59,8 +57,8 @@ def main():
             LDAP_SESSION = start_session(menu.SERVER, ldap_auth=False)
             ldap_paging(PAGE_SIZE, BASEDN, SEARCH_FILTER, ATTRS_LIST, LDAP_SESSION)
 
-    except (KeyboardInterrupt, ldap.SERVER_DOWN, ldap.UNWILLING_TO_PERFORM, \
-            ldap.INVALID_CREDENTIALS, ldap.SIZELIMIT_EXCEEDED) as e:
+    except (KeyboardInterrupt, SERVER_DOWN, UNWILLING_TO_PERFORM, \
+            INVALID_CREDENTIALS, SIZELIMIT_EXCEEDED) as e:
         exit(e)
 
 
@@ -143,63 +141,6 @@ def write_to_csv(csv_file, fmode, attrs, append_csv_headers=False):
             writer = csv.writer(f)
             writer.writerow(attrs)
 
-
-def ldap_paging(PAGE_SIZE, BASEDN, SEARCH_FILTER, ATTRS_LIST, LDAP_SESSION):
-    """ Try to pull the search results using paged controls """
-    # Check if we're using the Python "ldap" 2.4 or greater API
-    LDAP_API_CHECK = LooseVersion(ldap.__version__) >= LooseVersion('2.4')
-    lconn = LDAP_SESSION
-    # Create the page control to work from
-    lc = create_controls(PAGE_SIZE, LDAP_API_CHECK)
-
-    # Do searches until we run out of "pages" to get from
-    # the LDAP server.
-    while True:
-        # Send search request
-        try:
-            msgid = lconn.search_ext(BASEDN, ldap.SCOPE_SUBTREE, SEARCH_FILTER,
-                                     ATTRS_LIST, serverctrls=[lc])
-        except ldap.LDAPError as e:
-            exit('LDAP search failed: %s' % e)
-
-        # Pull the results from the search request
-        try:
-            rtype, rdata, rmsgid, serverctrls = lconn.result3(msgid)
-        except ldap.LDAPError as e:
-            exit('Could not pull LDAP results: %s' % e)
-
-        # Each "rdata" is a tuple of the form (dn, attrs), where dn is
-        # a string containing the DN (distinguished name) of the entry,
-        # and attrs is a dictionary containing the attributes associated
-        # with the entry. The keys of attrs are strings, and the associated
-        # values are lists of strings.
-        for dn, attrs in rdata:
-            if isinstance(attrs, dict) and attrs:
-                process_retrieved_data(attrs)
-
-        # Get cookie for next request
-        pctrls = get_pctrls(serverctrls, LDAP_API_CHECK)
-        if not pctrls:
-            logging.warning("Warning: Server ignores RFC 2696 control.")
-            break
-
-        # Ok, we did find the page control, yank the cookie from it and
-        # insert it into the control for our next search. If however there
-        # is no cookie, we are done!
-        cookie = set_cookie(lc, pctrls, PAGE_SIZE, LDAP_API_CHECK)
-        if not cookie:
-            break
-
-    # Add CSV headers
-    menu = menu_handler()
-    if menu.writetocsv:
-        attrs = menu.ATTRIBUTES+'\n'
-        write_to_csv(menu.writetocsv, 'r+', attrs, \
-        append_csv_headers=True)
-
-    # Clean up and exit
-    lconn.unbind()
-    exit(0)
 
 if __name__ == "__main__":
     main()
