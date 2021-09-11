@@ -15,6 +15,7 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+import ldap
 from ldap.controls import SimplePagedResultsControl
 
 """ Helper functions for LDAP paging """
@@ -49,3 +50,61 @@ def set_cookie(lc_object, pctrls, pagesize, LDAP_API_CHECK):
     est, cookie = pctrls[0].controlValue
     lc_object.controlValue = (pagesize, cookie)
     return cookie
+
+
+def ldap_paging(PAGE_SIZE, BASEDN, SEARCH_FILTER, ATTRS_LIST, LDAP_SESSION):
+    """ Try to pull the search results using paged controls """
+    # Check if we're using the Python "ldap" 2.4 or greater API
+    LDAP_API_CHECK = LooseVersion(ldap.__version__) >= LooseVersion('2.4')
+    lconn = LDAP_SESSION
+    # Create the page control to work from
+    lc = create_controls(PAGE_SIZE, LDAP_API_CHECK)
+
+    # Do searches until we run out of "pages" to get from
+    # the LDAP server.
+    while True:
+        # Send search request
+        try:
+            msgid = lconn.search_ext(BASEDN, ldap.SCOPE_SUBTREE, SEARCH_FILTER,
+                                     ATTRS_LIST, serverctrls=[lc])
+        except ldap.LDAPError as e:
+            exit('LDAP search failed: %s' % e)
+
+        # Pull the results from the search request
+        try:
+            rtype, rdata, rmsgid, serverctrls = lconn.result3(msgid)
+        except ldap.LDAPError as e:
+            exit('Could not pull LDAP results: %s' % e)
+
+        # Each "rdata" is a tuple of the form (dn, attrs), where dn is
+        # a string containing the DN (distinguished name) of the entry,
+        # and attrs is a dictionary containing the attributes associated
+        # with the entry. The keys of attrs are strings, and the associated
+        # values are lists of strings.
+        for dn, attrs in rdata:
+            if isinstance(attrs, dict) and attrs:
+                process_retrieved_data(attrs)
+
+        # Get cookie for next request
+        pctrls = get_pctrls(serverctrls, LDAP_API_CHECK)
+        if not pctrls:
+            logging.warning("Warning: Server ignores RFC 2696 control.")
+            break
+
+        # Ok, we did find the page control, yank the cookie from it and
+        # insert it into the control for our next search. If however there
+        # is no cookie, we are done!
+        cookie = set_cookie(lc, pctrls, PAGE_SIZE, LDAP_API_CHECK)
+        if not cookie:
+            break
+
+    # Add CSV headers
+    menu = menu_handler()
+    if menu.writetocsv:
+        attrs = menu.ATTRIBUTES+'\n'
+        write_to_csv(menu.writetocsv, 'r+', attrs, \
+        append_csv_headers=True)
+
+    # Clean up and exit
+    lconn.unbind()
+    exit(0)
