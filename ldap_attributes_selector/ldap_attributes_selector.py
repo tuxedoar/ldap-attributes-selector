@@ -47,6 +47,7 @@ def main():
         PAGE_SIZE = menu.sizelimit
         SEARCH_FILTER = menu.filter
         ATTRS_LIST = menu.ATTRIBUTES.split(',')
+        ldap_user = menu.userdn
 
         # Validate LDAP server URL
         if not ldapurl.isLDAPUrl(menu.SERVER):
@@ -55,11 +56,11 @@ def main():
 
         # Pass ldap_auth=True argument when LDAP authentication is needed!.
         if menu.userdn:
-            LDAP_SESSION = start_session(menu.SERVER, ldap_auth=True)
+            LDAP_SESSION = start_session(menu.SERVER, ldap_user, ldap_auth=True)
             ldap_paging(PAGE_SIZE, BASEDN, SEARCH_FILTER, ATTRS_LIST, LDAP_SESSION)
         else:
             # Anonymous query is performed!.
-            LDAP_SESSION = start_session(menu.SERVER, ldap_auth=False)
+            LDAP_SESSION = start_session(menu.SERVER, ldap_user, ldap_auth=False)
             ldap_paging(PAGE_SIZE, BASEDN, SEARCH_FILTER, ATTRS_LIST, LDAP_SESSION)
 
     except (KeyboardInterrupt, SERVER_DOWN, UNWILLING_TO_PERFORM, \
