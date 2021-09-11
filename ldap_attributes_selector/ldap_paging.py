@@ -21,18 +21,18 @@ from ldap_attributes_selector.ldap_attributes_selector import write_to_csv
 
 """ Helper functions for LDAP paging """
 
-def start_session(server, ldap_auth):
+def start_session(server, ldap_user, ldap_auth):
     """ Initiate the LDAP session """
-    menu = menu_handler()
+    #menu = menu_handler()
     ldap.set_option(ldap.OPT_X_TLS_REQUIRE_CERT, ldap.OPT_X_TLS_NEVER)
     ldap.set_option(ldap.OPT_PROTOCOL_VERSION, ldap.VERSION3)
     l = ldap.initialize(server)
     l.set_option(ldap.OPT_REFERRALS, 0)
 
     if ldap_auth:
-        user = menu.userdn
+        #user = menu.userdn
         creds = getpass.getpass('\nPlease, enter your LDAP credentials: ')
-        lsession = l.simple_bind_s(user, creds)
+        lsession = l.simple_bind_s(ldap_user, creds)
         if lsession:
             logging.info("\nSuccessful LDAP authentication!\n")
     else:
