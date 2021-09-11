@@ -17,6 +17,7 @@
 
 import ldap
 from ldap.controls import SimplePagedResultsControl
+from ldap_attributes_selector.ldap_attributes_selector import write_to_csv
 
 """ Helper functions for LDAP paging """
 
