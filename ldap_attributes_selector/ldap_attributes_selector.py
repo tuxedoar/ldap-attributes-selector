@@ -26,7 +26,6 @@ from sys import exit
 import logging
 import getpass
 from distutils.version import LooseVersion
-from ldap.controls import SimplePagedResultsControl
 import ldap
 import ldapurl
 from _version import __version__
