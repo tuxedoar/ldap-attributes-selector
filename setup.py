@@ -13,7 +13,7 @@ setup(
     author='tuxedoar',
     author_email='tuxedoar@gmail.com',
     packages=['ldap_attributes_selector'],
-    python_requires='>=3.6',
+    python_requires='>=3.7',
     scripts=["ldap_attributes_selector/_version.py"],
     entry_points={
         "console_scripts": [
@@ -26,7 +26,7 @@ setup(
 
     classifiers=[
         "Programming Language :: Python :: 3 :: Only",
-        "Programming Language :: Python :: 3.6",
+        "Programming Language :: Python :: 3.7",
         "License :: OSI Approved :: GNU General Public License v3 (GPLv3)",
         "Operating System :: OS Independent",
         "Intended Audience :: System Administrators",
