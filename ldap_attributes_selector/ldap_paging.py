@@ -15,6 +15,8 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+from ldap.controls import SimplePagedResultsControl
+
 """ Helper functions for LDAP paging """
 
 def create_controls(pagesize, LDAP_API_CHECK):
