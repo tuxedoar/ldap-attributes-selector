@@ -125,7 +125,7 @@ def ldap_paging(PAGE_SIZE, BASEDN, SEARCH_FILTER, ATTRS_LIST, LDAP_SESSION):
         # values are lists of strings.
         for dn, attrs in rdata:
             if isinstance(attrs, dict) and attrs:
-                process_retrieved_data(attrs)
+                yield attrs
 
         # Get cookie for next request
         pctrls = get_pctrls(serverctrls, LDAP_API_CHECK)
@@ -140,13 +140,5 @@ def ldap_paging(PAGE_SIZE, BASEDN, SEARCH_FILTER, ATTRS_LIST, LDAP_SESSION):
         if not cookie:
             break
 
-    # Add CSV headers
-    menu = menu_handler()
-    if menu.writetocsv:
-        attrs = menu.ATTRIBUTES+'\n'
-        write_to_csv(menu.writetocsv, 'r+', attrs, \
-        append_csv_headers=True)
-
     # Clean up and exit
     lconn.unbind()
-    exit(0)
