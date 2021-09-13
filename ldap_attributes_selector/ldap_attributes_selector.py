@@ -49,20 +49,21 @@ def main():
         ATTRS_LIST = menu.ATTRIBUTES.split(',')
         ldap_user = menu.userdn
 
+        writetocsv = True if menu.writetocsv else False
+
         # Validate LDAP server URL
         if not ldapurl.isLDAPUrl(menu.SERVER):
             logging.critical("\nERROR: %s has an invalid URL format!\n", menu.SERVER)
             exit(1)
 
-        # Pass ldap_auth=True argument when LDAP authentication is needed!.
         if menu.userdn:
+            # Set ldap_auth=True when LDAP authentication is chosen!
             LDAP_SESSION = start_session(menu.SERVER, ldap_user, ldap_auth=True)
-            ldap_paging(PAGE_SIZE, BASEDN, SEARCH_FILTER, ATTRS_LIST, LDAP_SESSION)
         else:
             # Anonymous query is performed!.
             LDAP_SESSION = start_session(menu.SERVER, ldap_user, ldap_auth=False)
-            ldap_paging(PAGE_SIZE, BASEDN, SEARCH_FILTER, ATTRS_LIST, LDAP_SESSION)
-
+        ldap_data = ldap_paging(PAGE_SIZE, BASEDN, SEARCH_FILTER, ATTRS_LIST, LDAP_SESSION)
+        retrieved_ldap_attrs = process_ldap_data(ldap_data, ATTRS_LIST, writetocsv)
     except (KeyboardInterrupt, SERVER_DOWN, UNWILLING_TO_PERFORM, \
             INVALID_CREDENTIALS, SIZELIMIT_EXCEEDED) as e:
         exit(e)
