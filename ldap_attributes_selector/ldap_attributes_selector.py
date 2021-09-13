@@ -20,12 +20,11 @@
 
 # https://gist.github.com/mattfahrner/c228ead9c516fc322d3a#file-python-paged-ldap-snippet-2-4-py
 
-import csv
 import argparse
 from sys import exit
 import logging
-import getpass
 import ldapurl
+import csv
 from ldap import SERVER_DOWN
 from ldap import UNWILLING_TO_PERFORM
 from ldap import INVALID_CREDENTIALS
@@ -34,7 +33,7 @@ from distutils.version import LooseVersion
 from _version import __version__
 from ldap_attributes_selector.ldap_paging import start_session
 from ldap_attributes_selector.ldap_paging import ldap_paging
-
+from ldap_attributes_selector.ldap_paging import process_ldap_data
 
 def main():
     """ LDAP session and logging setup """
