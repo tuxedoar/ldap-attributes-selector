@@ -38,7 +38,7 @@ def main():
     """ LDAP session and logging setup """
     try:
         # Setup logging
-        logging.basicConfig(format='%(message)s', level=logging.INFO)
+        logging.basicConfig(stream=stdout, format='%(message)s', level=logging.INFO)
         # Setup arguments for LDAP session
         menu = menu_handler()
         BASEDN = menu.BASEDN
