@@ -64,6 +64,12 @@ def main():
             LDAP_SESSION = start_session(menu.SERVER, ldap_user, ldap_auth=False)
         ldap_data = ldap_paging(PAGE_SIZE, BASEDN, SEARCH_FILTER, ATTRS_LIST, LDAP_SESSION)
         retrieved_ldap_attrs = process_ldap_data(ldap_data, ATTRS_LIST, writetocsv)
+        if writetocsv:
+            csv_file = menu.writetocsv
+            write_to_csv(csv_file, retrieved_ldap_attrs)
+            csv_headers = ';'.join(ATTRS_LIST)+'\n'
+            write_csv_headers(csv_file, csv_headers)
+            logging.info("\nResults have been written to CSV file: %s !\n", csv_file)
     except (KeyboardInterrupt, SERVER_DOWN, UNWILLING_TO_PERFORM, \
             INVALID_CREDENTIALS, SIZELIMIT_EXCEEDED) as e:
         exit(e)
