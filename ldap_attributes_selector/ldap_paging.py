@@ -72,7 +72,7 @@ def set_cookie(lc_object, pctrls, pagesize, LDAP_API_CHECK):
     return cookie
 
 
-def process_retrieved_data(retrieved_data, attrs_order, writetocsv):
+def process_ldap_data(retrieved_data, attrs_order, writetocsv):
     """ Show retrieved data or export to CSV """
     # Get the order in which attributes were requested!
     #attrs_order = menu.ATTRIBUTES.split(',')
