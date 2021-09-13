@@ -94,18 +94,12 @@ def menu_handler():
     return args
 
 
-def write_to_csv(csv_file, fmode, attrs, append_csv_headers=False):
+def write_to_csv(csv_file, attrs):
     """ Write retrieved results to a CSV file """
-
-    if append_csv_headers:
-        with open(csv_file, 'r') as original:
-            data = original.read()
-        with open(csv_file, 'w') as modified:
-            modified.write(attrs + data)
-    else:
-        with open(csv_file, fmode) as f:
-            writer = csv.writer(f)
-            writer.writerow(attrs)
+    with open(csv_file, 'a') as f:
+        writer = csv.writer(f)
+        for row in attrs:
+            writer.writerow(row)
 
 
 if __name__ == "__main__":
