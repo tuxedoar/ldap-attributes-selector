@@ -94,13 +94,20 @@ def menu_handler():
     return args
 
 
+def write_csv_headers(csv_file, csv_headers):
+    """ Write CSV headers """
+    with open(csv_file, 'r') as original:
+        data = original.read()
+    with open(csv_file, 'w') as modified:
+        modified.write(csv_headers + data)
+
+
 def write_to_csv(csv_file, attrs):
     """ Write retrieved results to a CSV file """
     with open(csv_file, 'a') as f:
         writer = csv.writer(f)
         for row in attrs:
             writer.writerow(row)
-
 
 if __name__ == "__main__":
     main()
