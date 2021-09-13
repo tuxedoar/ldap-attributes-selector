@@ -29,7 +29,6 @@ from ldap import SERVER_DOWN
 from ldap import UNWILLING_TO_PERFORM
 from ldap import INVALID_CREDENTIALS
 from ldap import SIZELIMIT_EXCEEDED
-from distutils.version import LooseVersion
 from _version import __version__
 from ldap_attributes_selector.ldap_paging import start_session
 from ldap_attributes_selector.ldap_paging import ldap_paging
