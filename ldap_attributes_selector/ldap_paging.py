@@ -16,8 +16,10 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 import ldap
+import getpass
+import logging
 from ldap.controls import SimplePagedResultsControl
-from ldap_attributes_selector.ldap_attributes_selector import write_to_csv
+from sys import exit
 
 """ Helper functions for LDAP paging """
 
