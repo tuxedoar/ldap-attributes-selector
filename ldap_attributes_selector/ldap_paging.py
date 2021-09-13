@@ -72,6 +72,28 @@ def set_cookie(lc_object, pctrls, pagesize, LDAP_API_CHECK):
     return cookie
 
 
+def process_retrieved_data(retrieved_data):
+    """ Show retrieved data or export to CSV """
+    menu = menu_handler()
+    # Get the order in which attributes were requested!
+    attrs_order = menu.ATTRIBUTES.split(',')
+
+    # Go through the retrieved attributes and find those selected by the user.
+    # Replace with 'None' whenever an attribute is not found!.
+    user_attrs = [retrieved_data.get(i, 'None') for i in attrs_order]
+    # Decode bytes type objects only and leave out those that are not ('None')!.
+    decoded_user_attrs = [i[0].decode() if isinstance(i[0], bytes) else i \
+                    for i in user_attrs]
+
+    # If '-w' argument was given, call function to write results to CSV!.
+    if menu.writetocsv:
+        write_to_csv(menu.writetocsv, 'a', decoded_user_attrs, \
+                        append_csv_headers=False)
+    else:
+        # Print selected attributes!.
+        print(','.join(decoded_user_attrs))
+
+
 def ldap_paging(PAGE_SIZE, BASEDN, SEARCH_FILTER, ATTRS_LIST, LDAP_SESSION):
     """ Try to pull the search results using paged controls """
     # Check if we're using the Python "ldap" 2.4 or greater API
