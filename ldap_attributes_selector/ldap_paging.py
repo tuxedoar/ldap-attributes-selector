@@ -15,24 +15,24 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-import ldap
+""" Helper functions for LDAP paging """
+
 import getpass
 import logging
-from ldap.controls import SimplePagedResultsControl
+from distutils.version import LooseVersion
 from sys import exit
+from ldap.controls import SimplePagedResultsControl
+import ldap
 
-""" Helper functions for LDAP paging """
 
 def start_session(server, ldap_user, ldap_auth):
     """ Initiate the LDAP session """
-    #menu = menu_handler()
     ldap.set_option(ldap.OPT_X_TLS_REQUIRE_CERT, ldap.OPT_X_TLS_NEVER)
     ldap.set_option(ldap.OPT_PROTOCOL_VERSION, ldap.VERSION3)
     l = ldap.initialize(server)
     l.set_option(ldap.OPT_REFERRALS, 0)
 
     if ldap_auth:
-        #user = menu.userdn
         creds = getpass.getpass('\nPlease, enter your LDAP credentials: ')
         lsession = l.simple_bind_s(ldap_user, creds)
         if lsession:
@@ -76,8 +76,6 @@ def set_cookie(lc_object, pctrls, pagesize, LDAP_API_CHECK):
 
 def process_ldap_data(retrieved_data, attrs_order, writetocsv):
     """ Show retrieved data or export to CSV """
-    # Get the order in which attributes were requested!
-    #attrs_order = menu.ATTRIBUTES.split(',')
     output = []
     for data in retrieved_data:
         # Go through the retrieved attributes and find those selected by the user.
