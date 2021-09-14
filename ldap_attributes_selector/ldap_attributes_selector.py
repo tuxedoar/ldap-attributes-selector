@@ -13,13 +13,6 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-# ACKNOWLEDGMENT
-
-# The pieces of code that implement LDAP queries with paged controls in this
-# program, are based on this Python snippet:
-
-# https://gist.github.com/mattfahrner/c228ead9c516fc322d3a#file-python-paged-ldap-snippet-2-4-py
-
 import argparse
 from sys import stdout
 from sys import exit
