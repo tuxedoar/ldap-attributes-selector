@@ -47,8 +47,7 @@ def main():
         SEARCH_FILTER = menu.filter
         ATTRS_LIST = menu.ATTRIBUTES.split(',')
         ldap_user = menu.userdn
-
-        writetocsv = True if menu.writetocsv else False
+        writetocsv = bool(menu.writetocsv)
 
         # Validate LDAP server URL
         if not ldapurl.isLDAPUrl(menu.SERVER):
