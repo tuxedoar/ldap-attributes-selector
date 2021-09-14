@@ -21,10 +21,11 @@
 # https://gist.github.com/mattfahrner/c228ead9c516fc322d3a#file-python-paged-ldap-snippet-2-4-py
 
 import argparse
+from sys import stdout
 from sys import exit
 import logging
-import ldapurl
 import csv
+import ldapurl
 from ldap import SERVER_DOWN
 from ldap import UNWILLING_TO_PERFORM
 from ldap import INVALID_CREDENTIALS
